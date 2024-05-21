@@ -3,7 +3,14 @@ export default class Game extends Phaser.Scene {
     super("main");
   }
 
-  init() {}
+  init() {
+    this.score = 0;
+    this.shapesCollect = {
+      "triangulo": {puntos: 10 },
+      "cuadrado": {puntos: 20 },
+      "rombo": {puntos: 30 },
+    }; //le asigna puntaje a cada forma
+  }
 
   preload() {
     //import Cielo
@@ -42,10 +49,18 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.personaje, this.plataformas);
     //agregar colision entre recolectables y plataforma
     this.physics.add.collider(this.recolectables, this.plataformas, this.reduce, null, this);
+    //agregar colision entre recolectables y personaje
+    this.physics.add.collider(this.recolectables, this.personaje, this.scoring, null, this);
 
     //crear teclas
     this.cursor = this.input.keyboard.createCursorKeys();
 
+    //texto puntaje
+    this.scoreText = this.add.text(16, 16, " SCORE: 0 ", {
+      fontSize: "16px",
+      fill: "#E0CDF8",
+      fontFamily: "Verdana",
+    });
 
     // evento 1 segundo
     this.time.addEvent({
@@ -54,9 +69,6 @@ export default class Game extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-
-    //agregar collider entre recolectables y personaje
-    //this.physics.add.collider(this.personaje, this.recolectables, CAMBIAR POR FUNCION CALLBACK, null, this);
   }
 
   onSecond() {
@@ -73,6 +85,20 @@ export default class Game extends Phaser.Scene {
 
   reduce(shape, platform) {
     shape.disableBody(true,true);
+  }
+
+  scoring(character, shape) {
+    shape.disableBody(true,true); //desaparece la figura
+    const shapeName = shape.texture.key; //detectar el nombre de la figura recolectada
+    const scoreNow = this.shapesCollect[shapeName].puntos //detectar los puntos de la figura recolectada y lo convierte en la puntuación q se suma
+    this.score += scoreNow; //va acumulando los puntos 
+    console.log(this.score)
+
+    this.scoreText.setText(" SCORE: " + this.score );
+    if(this.score >= 100) {
+      console.log("ganaste")
+      this.score = 0;
+    }
   }
   
   update() {
