@@ -4,12 +4,12 @@ export default class Game extends Phaser.Scene {
   }
 
   init() {
-    this.puntuacion = 0; 
+  /*  this.puntuacion = 0; 
     this.figuras = {
       "triangulo": {puntos: 10, cantidad: 0},
       "cuadrado": {puntos: 20, cantidad: 0},
       "rombo": {puntos: 30, cantidad: 0}
-    }
+    }*/
   }
 
   preload() {
@@ -47,8 +47,8 @@ export default class Game extends Phaser.Scene {
 
     //agregar colision entre personaje y plataforma
     this.physics.add.collider(this.personaje, this.plataformas);
-    this.physics.add.collider(this.recolectables, this.plataformas, this.piso, null, this); 
-    this.physics.add.collider(this.recolectables, this.personaje, this.puntaje, null, this); 
+    //this.physics.add.collider(this.recolectables, this.plataformas, this.piso, null, this); 
+    //this.physics.add.collider(this.recolectables, this.personaje, this.puntaje, null, this); 
 
     //crear teclas
     this.cursor = this.input.keyboard.createCursorKeys();
@@ -61,7 +61,7 @@ export default class Game extends Phaser.Scene {
       loop: true,
     });
 
-    this.puntajeText = this.add.text(16, 16, "T: 0 / C: 0 / R: 0 / Puntuación: 0")
+    //this.puntajeText = this.add.text(16, 16, "T: 0 / C: 0 / R: 0 / Puntuación: 0")
   }
   
   update() {
@@ -90,11 +90,11 @@ export default class Game extends Phaser.Scene {
     recolectable.setVelocity(0, 100);
   }
 
-  piso(figuras, plataformas) {
+  /*piso(figuras, plataformas) {
     figuras.disableBody(true, true);
-  }
+  }*/
 
-  puntaje(personaje, figuras) {
+  /*puntaje(personaje, figuras) {
     figuras.disableBody(true, true);
     const nombreFig = figuras.texture.key;
     const puntosFig = this.figuras[nombreFig].puntos;
@@ -118,5 +118,5 @@ export default class Game extends Phaser.Scene {
         puntuacion: this.puntuacion
       })
     }
-  }
+  }*/
 }
