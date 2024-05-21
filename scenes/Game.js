@@ -4,12 +4,12 @@ export default class Game extends Phaser.Scene {
   }
 
   init() {
-    this.score = 0;
-    this.shapesCollect = {
-      "triangulo": {puntos: 10 },
-      "cuadrado": {puntos: 20 },
-      "rombo": {puntos: 30 },
-    }; //le asigna puntaje a cada forma
+    this.puntuacion = 0; 
+    this.figuras = {
+      "triangulo": {puntos: 10, cantidad: 0},
+      "cuadrado": {puntos: 20, cantidad: 0},
+      "rombo": {puntos: 30, cantidad: 0}
+    }
   }
 
   preload() {
@@ -47,20 +47,11 @@ export default class Game extends Phaser.Scene {
 
     //agregar colision entre personaje y plataforma
     this.physics.add.collider(this.personaje, this.plataformas);
-    //agregar colision entre recolectables y plataforma
-    this.physics.add.collider(this.recolectables, this.plataformas, this.reduce, null, this);
-    //agregar colision entre recolectables y personaje
-    this.physics.add.collider(this.recolectables, this.personaje, this.scoring, null, this);
+    this.physics.add.collider(this.recolectables, this.plataformas, this.piso, null, this); 
+    this.physics.add.collider(this.recolectables, this.personaje, this.puntaje, null, this); 
 
     //crear teclas
     this.cursor = this.input.keyboard.createCursorKeys();
-
-    //texto puntaje
-    this.scoreText = this.add.text(16, 16, " SCORE: 0 ", {
-      fontSize: "16px",
-      fill: "#E0CDF8",
-      fontFamily: "Verdana",
-    });
 
     // evento 1 segundo
     this.time.addEvent({
@@ -69,36 +60,8 @@ export default class Game extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-  }
 
-  onSecond() {
-    // crear recolectable
-    const tipos = ["triangulo", "cuadrado", "rombo"];
-    const tipo = Phaser.Math.RND.pick(tipos);
-    let recolectable = this.recolectables.create(
-      Phaser.Math.Between(10, 790),
-      0,
-      tipo
-    );
-    recolectable.setVelocity(0, 100);
-  }
-
-  reduce(shape, platform) {
-    shape.disableBody(true,true);
-  }
-
-  scoring(character, shape) {
-    shape.disableBody(true,true); //desaparece la figura
-    const shapeName = shape.texture.key; //detectar el nombre de la figura recolectada
-    const scoreNow = this.shapesCollect[shapeName].puntos //detectar los puntos de la figura recolectada y lo convierte en la puntuación q se suma
-    this.score += scoreNow; //va acumulando los puntos 
-    console.log(this.score)
-
-    this.scoreText.setText(" SCORE: " + this.score );
-    if(this.score >= 100) {
-      console.log("ganaste")
-      this.score = 0;
-    }
+    this.puntajeText = this.add.text(16, 16, "T: 0 / C: 0 / R: 0 / Puntuación: 0")
   }
   
   update() {
@@ -112,6 +75,48 @@ export default class Game extends Phaser.Scene {
     }
     if (this.cursor.up.isDown && this.personaje.body.touching.down) {
       this.personaje.setVelocityY(-330);
+    }
+  }
+  
+  onSecond() {
+    // crear recolectable
+    const tipos = ["triangulo", "cuadrado", "rombo"];
+    const tipo = Phaser.Math.RND.pick(tipos);
+    let recolectable = this.recolectables.create(
+      Phaser.Math.Between(10, 790),
+      0,
+      tipo
+    );
+    recolectable.setVelocity(0, 100);
+  }
+
+  piso(figuras, plataformas) {
+    figuras.disableBody(true, true);
+  }
+
+  puntaje(personaje, figuras) {
+    figuras.disableBody(true, true);
+    const nombreFig = figuras.texture.key;
+    const puntosFig = this.figuras[nombreFig].puntos;
+    this.figuras[nombreFig].cantidad ++ 
+
+    this.puntuacion += puntosFig; 
+    this.puntajeText.setText(
+      "T: " + this.figuras["triangulo"].cantidad + 
+      " / C: " + this.figuras["cuadrado"].cantidad + 
+      " / R: " + this.figuras["rombo"].cantidad + 
+      " / Puntuación: " + this.puntuacion
+    );
+
+    if (
+      this.puntuacion >= 100 &&
+      this.figuras["triangulo"].cantidad >= 2 &&
+      this.figuras["cuadrado"].cantidad >= 2 &&
+      this.figuras["rombo"].cantidad >= 2 
+    ) {
+      this.scene.start("victoria", {
+        puntuacion: this.puntuacion
+      })
     }
   }
 }
